@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Kafka Topic Provenance Map</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <style>
+        #cy {
+            width: 100%;
+            height: 90vh;
+            border: 1px solid #ddd;
+            background-color: #fcfcfc;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f7f6;
+        }
+
+        h1 {
+            color: #2c3e50;
+            font-weight: 300;
+        }
+
+        .legend {
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+
+        .legend-item {
+            display: inline-block;
+            margin-right: 15px;
+        }
+
+        .dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        .box {
+            height: 10px;
+            width: 10px;
+            display: inline-block;
+            margin-right: 5px;
+            border: 1px solid #999;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Kafka Topic Provenance Map</h1>
+    <div class="legend">
+        <div class="legend-item"><span class="box" style="background-color: #e8f4fa;"></span> Project (Group)</div>
+        <div class="legend-item"><span class="dot" style="background-color: #3498db;"></span> File</div>
+        <div class="legend-item"><span class="dot" style="background-color: #2ecc71;"></span> Resolved Topic</div>
+        <div class="legend-item"><span class="dot" style="background-color: #e74c3c;"></span> Literal/Unknown</div>
+    </div>
+    <div id="cy"></div>
+
+    <script>
+        fetch('topic_map.json')
+            .then(response => response.json())
+            .then(data => {
+                const elements = [];
+                const projects = new Set();
+                const nodes = new Set();
+
+                function addProject(projName) {
+                    if (!projName || projects.has(projName)) return;
+                    projects.add(projName);
+                    elements.push({
+                        data: { id: "proj_" + projName, label: projName },
+                        classes: 'project'
+                    });
+                }
+
+                function addFile(file, project) {
+                    const id = "file_" + file;
+                    if (nodes.has(id)) return id;
+                    nodes.add(id);
+
+                    addProject(project);
+
+                    elements.push({
+                        data: {
+                            id: id,
+                            label: file.split('/').pop(),
+                            parent: "proj_" + project // Assign to project group
+                        },
+                        classes: 'file'
+                    });
+                    return id;
+                }
+
+                function addTopic(topic, isResolved) {
+                    const id = "topic_" + topic;
+                    if (nodes.has(id)) return id;
+                    nodes.add(id);
+                    elements.push({
+                        data: { id: id, label: topic },
+                        classes: isResolved ? 'topic_resolved' : 'topic_literal'
+                    });
+                    return id;
+                }
+
+                // Process Links
+                data.links.forEach(link => {
+                    const defFileId = addFile(link.definitionFile, link.definitionProject);
+                    const useFileId = addFile(link.usageFile, link.usageProject);
+                    const topicId = addTopic(link.topic, true);
+
+                    elements.push({ data: { source: defFileId, target: topicId, label: 'defines' } });
+                    elements.push({ data: { source: topicId, target: useFileId, label: 'L' + link.usageLine } });
+                });
+
+                // Process Literals
+                data.literals.forEach(lit => {
+                    const fileId = addFile(lit.file, lit.project);
+                    const topicId = addTopic(lit.topic, false); // Treat literals as topics
+                    elements.push({ data: { source: fileId, target: topicId, label: 'L' + lit.line } });
+                });
+
+                var cy = cytoscape({
+                    container: document.getElementById('cy'),
+                    elements: elements,
+                    style: [
+                        {
+                            selector: 'node',
+                            style: {
+                                'label': 'data(label)',
+                                'text-valign': 'center',
+                                'color': '#333',
+                                'text-outline-color': '#fff',
+                                'text-outline-width': 2,
+                                'font-size': '10px'
+                            }
+                        },
+                        {
+                            selector: '.project',
+                            style: {
+                                'background-color': '#f0f8ff',
+                                'border-color': '#a0c0e0',
+                                'border-width': 1,
+                                'shape': 'rectangle',
+                                'text-valign': 'top',
+                                'text-halign': 'center',
+                                'font-weight': 'bold',
+                                'color': '#555',
+                                'padding': '10px'
+                            }
+                        },
+                        {
+                            selector: '.file',
+                            style: {
+                                'background-color': '#3498db',
+                                'width': 10,
+                                'height': 10
+                            }
+                        },
+                        {
+                            selector: '.topic_resolved',
+                            style: {
+                                'background-color': '#2ecc71',
+                                'width': 20,
+                                'height': 20
+                            }
+                        },
+                        {
+                            selector: '.topic_literal',
+                            style: {
+                                'background-color': '#e74c3c',
+                                'width': 15,
+                                'height': 15
+                            }
+                        },
+                        {
+                            selector: 'edge',
+                            style: {
+                                'width': 1,
+                                'line-color': '#ccc',
+                                'target-arrow-color': '#ccc',
+                                'target-arrow-shape': 'triangle',
+                                'curve-style': 'bezier',
+                                'font-size': '8px',
+                                'label': 'data(label)',
+                                'text-rotation': 'autorotate'
+                            }
+                        }
+                    ],
+                    layout: {
+                        name: 'cose',
+                        animate: false,
+                        padding: 50,
+                        nodeOverlap: 20,
+                        idealEdgeLength: 60,
+                        edgeElasticity: 100
+                    }
+                });
+            })
+            .catch(err => {
+                document.getElementById('cy').innerHTML = "Error: " + err;
+            });
+    </script>
+</body>
+
+</html>

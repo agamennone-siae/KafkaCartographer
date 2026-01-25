@@ -1,0 +1,14 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Docker: Build and Run",
+            "type": "shell",
+            "command": "docker build -t kafka-cartographer . && docker run --rm -v \"${workspaceFolder}:/app/scan\" kafka-cartographer /app/scan",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}
