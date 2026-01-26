@@ -51,3 +51,21 @@ To scan a specific project path:
 ```bash
 docker run --rm -v /home/user/my-projects:/scan kafka-cartographer /scan
 ```
+
+## Running the Visualization
+
+The project includes an `index.html` file to visualize the generated `topic_map.json`. You can serve this using a Docker container.
+
+### 1. Build the Visualization Image
+
+```bash
+docker build -f Dockerfile.visualization -t kafka-cartographer-web .
+```
+
+### 2. Run the Visualization Server
+
+```bash
+docker run --rm -p 8080:80 kafka-cartographer-web
+```
+
+Once running, open [http://localhost:8080](http://localhost:8080) in your browser.

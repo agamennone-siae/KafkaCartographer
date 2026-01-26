@@ -6,6 +6,12 @@
             "type": "node",
             "request": "launch",
             "preLaunchTask": "Docker: Build and Run"
+        },
+        {
+            "name": "Launch Visualization",
+            "type": "node",
+            "request": "launch",
+            "preLaunchTask": "Serve Visualization (Docker)"
         }
     ]
 }

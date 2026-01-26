@@ -9,6 +9,16 @@
                 "reveal": "always",
                 "panel": "new"
             }
+        },
+        {
+            "label": "Serve Visualization (Docker)",
+            "type": "shell",
+            "command": "docker stop kafka-cartographer-viz || true && docker build -f Dockerfile.visualization -t kafka-cartographer-web . && docker run --rm -p 8080:80 --name kafka-cartographer-viz kafka-cartographer-web",
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": []
         }
     ]
 }
