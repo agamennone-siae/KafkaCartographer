@@ -76,4 +76,9 @@ docker build -f Dockerfile.visualization -t kafka-cartographer-web .
 docker run --rm -p 8080:80 kafka-cartographer-web
 ```
 
-Once running, open [http://localhost:8080](http://localhost:8080) in your browser.
+
+## Visualization
+
+Here is an example of the generated topic map:
+
+![Visualization](docs/visualization.png)
