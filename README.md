@@ -52,6 +52,14 @@ To scan a specific project path:
 docker run --rm -v /home/user/my-projects:/scan kafka-cartographer /scan
 ```
 
+### 3. Try the Sample Project
+
+The repository includes a `sample` folder with a dummy Java project to test the scanner.
+
+```bash
+docker run --rm -v $(pwd)/sample:/scan kafka-cartographer /scan
+```
+
 ## Running the Visualization
 
 The project includes an `index.html` file to visualize the generated `topic_map.json`. You can serve this using a Docker container.
