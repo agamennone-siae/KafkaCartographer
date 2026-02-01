@@ -25,11 +25,12 @@ run_scan() {
     fi
     
     echo ""
-    echo -n "Enter the full path to scan (default: $(pwd)): "
+    default_path="$(pwd)/scan"
+    echo -n "Enter the full path to scan (default: $default_path): "
     read scan_path
     
     if [ -z "$scan_path" ]; then
-        scan_path=$(pwd)
+        scan_path="$default_path"
     fi
     
     echo "Scanning: $scan_path"
