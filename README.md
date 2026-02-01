@@ -19,8 +19,27 @@ In large distributed systems, tracking Kafka topic dependencies can be difficult
 ## Prerequisites
 
 -   Docker
+-   Bash (Linux/macOS)
 
-## Building and Running with Docker
+## Quick Start (CLI)
+
+The easiest way to use the tool is via the included CLI script, which handles Docker commands for you.
+
+1.  Make the script executable (first time only):
+    ```bash
+    chmod +x run.sh
+    ```
+
+2.  Run the script:
+    ```bash
+    ./run.sh
+    ```
+
+3.  Select an option from the menu:
+    -   **1. Scan a project**: Prompts for a directory path (absolute) and generates the `topic_map.json`.
+    -   **2. Visualize results**: Builds and starts the web server to view the map at `http://localhost:8080`.
+
+## Building and Running with Docker (Manual)
 
 You can build and run the application easily using Docker, without needing to install Java or Maven locally.
 
