@@ -29,6 +29,10 @@ public class Main {
         Map<String, Object> result = scanner.scan(rootDir);
 
         saveReport(result, rootDir);
+
+        // Export to Elasticsearch
+        ElasticsearchExporter esExporter = new ElasticsearchExporter();
+        esExporter.export(result);
     }
 
     private static void saveReport(Map<String, Object> data, File outputDir) {
